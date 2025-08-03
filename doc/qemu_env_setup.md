@@ -51,6 +51,7 @@ make -C ../linux/ O=$(pwd) $MY_CROSS menuconfig
 make -C ../linux/ O=$(pwd) $MY_CROSS distclean # clean .config as well
 make -C ../linux/ O=$(pwd) $MY_CROSS bzImage
 make -C ../linux/ O=$(pwd) $MY_CROSS mrproper
+make -C ../linux/ O=$(pwd) $MY_CROSS uImage LOADADDR=0x60008000
 make -C ../linux/ O=$(pwd) $MY_CROSS -j16
 make -C ../linux/ INSTALL_PATH=$(pwd)/output O=$(pwd) $MY_CROSS install
 
@@ -81,12 +82,18 @@ make KBUILD_SRC=../busybox -f ../busybox/Makefile CONFIG_PREFIX=./output install
 ## Image prepare
 
 ```bash
-dd if=/dev/zero of=disk.img bs=1M count=256
-parted disk.img --script \
+dd if=/dev/zero of=vm/disk.img bs=1M count=256
+parted vm/disk.img --script \
     mklabel gpt \
     mkpart primary fat32 1MiB 129MiB \
     mkpart primary ext4 129MiB 100% \
     print
+
+dd if=kernel/build/arch/arm/boot/uImage of=vm/disk.img bs=1M seek=1 conv=notrunc
+
+# the verify
+hexdump -C -n 64 -s 1048570 vm/disk.img
+
 
 ```
 
