@@ -1,5 +1,6 @@
 kernel/build
 kernel/linux
+kernel/*.xz
 busybox/build*
 busybox/busybox
 uboot/u-boot
