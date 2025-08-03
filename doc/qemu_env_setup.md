@@ -1,10 +1,13 @@
 # qemu_env_setup.md
 
-## Cross-compiler
+## Preinstalls
 
 ```bash
-sudo apt install gcc-mipsel-linux-gnu
+#sudo apt install gcc-mipsel-linux-gnu
+sudo apt install gcc-arm-linux-gnueabi
 sudo apt install u-boot-tools #mkimage
+sudo apt install libgnutls28-dev # for u-boot
+sudo apt install qemu-system-arm
 ```
 
 ## u-boot (mips or arm)
@@ -13,11 +16,19 @@ sudo apt install u-boot-tools #mkimage
 # Download
 wget https://github.com/u-boot/u-boot/archive/refs/tags/v2025.10-rc1.tar.gz
 
-# `
+# Compile
+MY_CROSS="ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-"
+make -C ../u-boot O=$(pwd) $MY_CROSS vexpress_ca9x4_defconfig
+make -C ../u-boot O=$(pwd) $MY_CROSS
+
+# boot with qemu 
+qemu-system-arm \
+    -M vexpress-a9 \
+    -m 256M \
+    -kernel u-boot \
+    -nographic
+# Ctrl-a x to force exit qemu
 ```
-
-
-
 
 ## Kernel compile
 
@@ -33,7 +44,7 @@ mv linux-6.12 linux
 
 ```bash
 sudo apt install libncurses-dev flex bison libssl-dev libelf-dev -y
-MY_CROSS=ARCH="mips CROSS_COMPILE=mipsel-linux-gnu-"
+MY_CROSS=ARCH="arm CROSS_COMPILE=arm-linux-gnueabi-"
 make -C ../linux/ O=$(pwd) $MY_CROSS defconfig
 make -C ../linux/ O=$(pwd) $MY_CROSS allnoconfig
 make -C ../linux/ O=$(pwd) $MY_CROSS menuconfig 
@@ -60,24 +71,38 @@ mv busybox-1.36.1 busybox
 ```bash
 tar xf 
 mkdir build
-make -C ../busybox O=$(pwd) defconfig [allyesconfig|defconfig|menuconfig]
-make -C ../busybox O=$(pwd) -j4
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabi-
+comment out CONFIG_TC=y # kernel >= 6.8 
+make KBUILD_SRC=../busybox -f ../busybox/Makefile defconfig
+make KBUILD_SRC=../busybox -f ../busybox/Makefile CONFIG_PREFIX=./output install -j8
 ```
 
 ## Image prepare
 
 ```bash
 dd if=/dev/zero of=disk.img bs=1M count=256
-parted disk.img --script mklabel gpt mkpart primary 0% 100%
+parted disk.img --script \
+    mklabel gpt \
+    mkpart primary fat32 1MiB 129MiB \
+    mkpart primary ext4 129MiB 100% \
+    print
+
 ```
 
 ## Qemu setup
 
 ```bash
-sudo apt update
-sudo apt install 
-sudo apt install virt-manager
+qemu-system-arm \
+    -M vexpress-a9 \
+    -m 256M \
+    -kernel uboot/build/u-boot \
+    -drive file=vm/disk.img,format=raw,if=sd \
+    -serial stdio \
+    -monitor none \
+    -nographic
 
-# will have qemu-system-amd64
+# Ctrl-a x to force exit qemu
+
 ```
 
