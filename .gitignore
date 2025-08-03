@@ -1,0 +1,6 @@
+kernel/build
+kernel/linux
+busybox/build*
+busybox/busybox
+uboot/u-boot
+vm/
