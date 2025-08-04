@@ -94,7 +94,13 @@ dd if=kernel/build/arch/arm/boot/uImage of=vm/disk.img bs=1M seek=1 conv=notrunc
 # the verify
 hexdump -C -n 64 -s 1048570 vm/disk.img
 
+12M 
+--> 24576 sectors/512B
+mmc read 0x60008000 0x800 6000
+bootm 0x60008000
 
+mmc read 0x60100000 0x800 6000
+bootm 0x60100000
 ```
 
 ## Qemu setup
@@ -108,6 +114,8 @@ qemu-system-arm \
     -serial stdio \
     -monitor none \
     -nographic
+
+
 
 # Ctrl-a x to force exit qemu
 
