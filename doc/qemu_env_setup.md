@@ -44,9 +44,10 @@ mv linux-6.12 linux
 
 ```bash
 sudo apt install libncurses-dev flex bison libssl-dev libelf-dev -y
-MY_CROSS=ARCH="arm CROSS_COMPILE=arm-linux-gnueabi-"
+MY_CROSS="ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-"
 make -C ../linux/ O=$(pwd) $MY_CROSS defconfig
 make -C ../linux/ O=$(pwd) $MY_CROSS allnoconfig
+make -C ../linux/ O=$(pwd) $MY_CROSS vexpress_defconfig # use this
 make -C ../linux/ O=$(pwd) $MY_CROSS menuconfig 
 make -C ../linux/ O=$(pwd) $MY_CROSS distclean # clean .config as well
 make -C ../linux/ O=$(pwd) $MY_CROSS bzImage
@@ -96,11 +97,8 @@ hexdump -C -n 64 -s 1048570 vm/disk.img
 
 12M 
 --> 24576 sectors/512B
-mmc read 0x60008000 0x800 6000
+mmc read 0x60008000 0x800 3000
 bootm 0x60008000
-
-mmc read 0x60100000 0x800 6000
-bootm 0x60100000
 ```
 
 ## Qemu setup
