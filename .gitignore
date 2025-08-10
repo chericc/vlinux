@@ -9,3 +9,4 @@ vm/disk.img
 toolchain/*.xz
 toolchain/arm*
 vm/rootfs.ext4
+vm/image
