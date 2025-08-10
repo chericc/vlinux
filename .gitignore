@@ -6,3 +6,6 @@ busybox/busybox
 uboot/u-boot
 uboot/build
 vm/disk.img
+toolchain/*.xz
+toolchain/arm*
+vm/rootfs.ext4
